@@ -7,6 +7,11 @@ class ProductCreate(BaseModel):
     description: str
 
 
+class ProductChange(BaseModel):
+    price: int
+    description: str
+
+
 class UserResponse(BaseModel):
     id: int
     username: str
@@ -21,3 +26,9 @@ class AddToCart(BaseModel):
 class OrderCreate(BaseModel):
     email: str
     user_id: int
+
+
+class UserCreate(BaseModel):
+    username: str
+    password: str
+    role: str = 'customer'

@@ -1,26 +1,33 @@
 from fastapi import APIRouter
 import sqlite3
 
-from online_shop.schemas import ProductCreate, AddToCart, OrderCreate
-from online_shop.repositories import ProductRepo, OrderRepo, CartRepo
-from online_shop.services import OrderService, ProductService, CartService
+from online_shop.schemas import ProductCreate, AddToCart, OrderCreate, UserCreate, ProductChange
+from online_shop.repositories import ProductRepo, OrderRepo, CartRepo, UserRepo
+from online_shop.services import OrderService, ProductService, CartService, UserService
 from online_shop.database import create_tables
 
 router = APIRouter()
 conn = sqlite3.connect("shop.db", check_same_thread=False)
 
 create_tables(conn)
+user_repo = UserRepo(conn)
+user_service = UserService(user_repo)
 product_repo = ProductRepo(conn)
-product_service = ProductService(product_repo)
+product_service = ProductService(product_repo, user_service)
 order_repo = OrderRepo(conn)
 order_service = OrderService(order_repo)
 cart_repo = CartRepo(conn)
 cart_service = CartService(cart_repo)
 
 
-@router.post("/admin/product")
-def create_product(product: ProductCreate):
-    return product_service.create_product(product)
+@router.post("/product")
+def create_product(user_id: int, product: ProductCreate):
+    return product_service.create_product(user_id, product, user_service)
+
+
+@router.path("/product/{product_id}")
+def change_product(product_id: int, user_id: int, product: ProductChange):
+    return product_service.change_product(product_id, user_id, product)
 
 
 @router.get("/products")
@@ -44,3 +51,6 @@ def create_order(order: OrderCreate):
     return order_service.place_order(order, items)
 
 
+@router.post("/user")
+def create_user(user: UserCreate):
+    return user_service.add_user(user)

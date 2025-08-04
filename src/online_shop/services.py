@@ -1,13 +1,43 @@
-from online_shop.repositories import ProductRepo, OrderRepo, CartRepo
-from online_shop.schemas import ProductCreate, AddToCart, OrderCreate
+from fastapi import HTTPException
+
+from online_shop.repositories import ProductRepo, OrderRepo, CartRepo, UserRepo
+from online_shop.resources import user_service
+from online_shop.schemas import ProductCreate, AddToCart, OrderCreate, UserCreate, ProductChange
+
+
+class UserService:
+    def __init__(self, repo: UserRepo):
+        self.repo = repo
+
+    def add_user(self, user: UserCreate):
+        return self.repo.create_user(user)
+
+    def check_role(self, user_id: int):
+        role = self.repo.check_role(user_id)
+        if not role:
+            raise HTTPException(status_code=404, detail="User not found")
+        else:
+            return role[0]
 
 
 class ProductService:
-    def __init__(self, repo: ProductRepo):
+    def __init__(self, repo: ProductRepo, user_service: UserService):
         self.repo = repo
+        self.user_service = user_service
 
-    def create_product(self, product: ProductCreate) -> int:
-        return self.repo.add_product(product)
+    def create_product(self, user_id: int, product: ProductCreate):
+        role = self.user_service.check_role(user_id)
+        if role == "admin":
+            return self.repo.add_product(product)
+        else:
+            raise HTTPException(status_code=403, detail="Insufficient Rights")
+
+    def change_product(self,user_id: int, product_id, product: ProductChange):
+        role = self.user_service.check_role(user_id)
+        if role != "customer":
+            return self.repo.change_product(product_id, product)
+        else:
+            raise HTTPException(status_code=403, detail="Insufficient Rights")
 
     def get_products(self):
         return self.repo.get_products()

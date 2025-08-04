@@ -1,8 +1,7 @@
 import json
 import sqlite3
 
-from online_shop.domains import Product
-from online_shop.schemas import AddToCart, ProductCreate, OrderCreate
+from online_shop.schemas import AddToCart, ProductCreate, OrderCreate, UserCreate, ProductChange
 
 
 class ProductRepo:
@@ -34,6 +33,11 @@ class ProductRepo:
         cur.execute("SELECT * FROM products")
         return cur.fetchall()
 
+    def change_product(self, product_id, product: ProductChange):
+        self.conn.execute("ALTER TABLE products (price, description) VALUES (?, ?) WHERE product_id = ?",
+                          (product.price, product.description, product_id))
+        self.conn.commit()
+        return {"message": "Product data change"}
 
 class CartRepo:
     def __init__(self, conn):
@@ -49,7 +53,7 @@ class CartRepo:
         self.conn.row_factory = sqlite3.Row
         cur = self.conn.cursor()
         cur.execute("SELECT * FROM carts WHERE user_id = ?", (user_id,))
-        return cur.fetchall()
+        return json.dumps([dict(row) for row in cur.fetchall()])
 
 
 class OrderRepo:
@@ -57,8 +61,24 @@ class OrderRepo:
         self.conn = conn
 
     def create_order(self, order: OrderCreate, items):
-        json_items = json.dumps([dict(row) for row in items])
         cur = self.conn.cursor()
-        cur.execute("INSERT INTO orders (customer_email, items) VALUES (?, ?)", (order.email, json_items))
+        cur.execute("INSERT INTO orders (customer_email, items) VALUES (?, ?)", (order.email, items))
         self.conn.commit()
         return cur.lastrowid
+
+
+class UserRepo:
+    def __init__(self, conn):
+        self.conn = conn
+
+    def create_user(self, user: UserCreate):
+        cur = self.conn.cursor()
+        cur.execute("INSERT INTO users (username, password, role) VALUES (?, ?, ?)",
+                    (user.username, user.password, user.role))
+        self.conn.commit()
+        return cur.lastrowid
+
+    def check_role(self, user_id: int):
+        cur = self.conn.cursor()
+        cur.execute("SELECT role FROM users WHERE user_id = ?", (user_id, ))
+        return cur.fetchone()
