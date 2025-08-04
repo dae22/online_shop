@@ -34,7 +34,7 @@ class ProductRepo:
         return cur.fetchall()
 
     def change_product(self, product_id, product: ProductChange):
-        self.conn.execute("ALTER TABLE products (price, description) VALUES (?, ?) WHERE product_id = ?",
+        self.conn.execute("UPDATE products SET price = ?, description = ? WHERE id = ?",
                           (product.price, product.description, product_id))
         self.conn.commit()
         return {"message": "Product data change"}

@@ -22,10 +22,10 @@ cart_service = CartService(cart_repo)
 
 @router.post("/product")
 def create_product(user_id: int, product: ProductCreate):
-    return product_service.create_product(user_id, product, user_service)
+    return product_service.create_product(user_id, product)
 
 
-@router.path("/product/{product_id}")
+@router.patch("/product/{product_id}")
 def change_product(product_id: int, user_id: int, product: ProductChange):
     return product_service.change_product(product_id, user_id, product)
 

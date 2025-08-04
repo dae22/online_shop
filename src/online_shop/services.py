@@ -1,7 +1,6 @@
 from fastapi import HTTPException
 
 from online_shop.repositories import ProductRepo, OrderRepo, CartRepo, UserRepo
-from online_shop.resources import user_service
 from online_shop.schemas import ProductCreate, AddToCart, OrderCreate, UserCreate, ProductChange
 
 
