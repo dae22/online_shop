@@ -31,4 +31,4 @@ class OrderCreate(BaseModel):
 class UserCreate(BaseModel):
     username: str
     password: str
-    role: str = 'customer'
+    role: str = "customer"

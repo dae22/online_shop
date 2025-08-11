@@ -1,7 +1,13 @@
 from fastapi import APIRouter
 import sqlite3
 
-from online_shop.schemas import ProductCreate, AddToCart, OrderCreate, UserCreate, ProductChange
+from online_shop.schemas import (
+    ProductCreate,
+    AddToCart,
+    OrderCreate,
+    UserCreate,
+    ProductChange,
+)
 from online_shop.repositories import ProductRepo, OrderRepo, CartRepo, UserRepo
 from online_shop.services import OrderService, ProductService, CartService, UserService
 from online_shop.database import create_tables

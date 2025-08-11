@@ -1,7 +1,13 @@
 from fastapi import HTTPException
 
 from online_shop.repositories import ProductRepo, OrderRepo, CartRepo, UserRepo
-from online_shop.schemas import ProductCreate, AddToCart, OrderCreate, UserCreate, ProductChange
+from online_shop.schemas import (
+    ProductCreate,
+    AddToCart,
+    OrderCreate,
+    UserCreate,
+    ProductChange,
+)
 
 
 class UserService:
@@ -31,7 +37,7 @@ class ProductService:
         else:
             raise HTTPException(status_code=403, detail="Insufficient Rights")
 
-    def change_product(self,user_id: int, product_id, product: ProductChange):
+    def change_product(self, user_id: int, product_id, product: ProductChange):
         role = self.user_service.check_role(user_id)
         if role != "customer":
             return self.repo.change_product(product_id, product)
